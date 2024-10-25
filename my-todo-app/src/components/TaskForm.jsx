@@ -9,6 +9,9 @@ import {
   Box,
   Grid,
   Snackbar,
+  List,
+  ListItem,
+  Checkbox,
 } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +26,7 @@ const TaskForm = ({ addTask, editingTask, handleEditTask }) => {
   const [dueDate, setDueDate] = useState('');
   const [dueTime, setDueTime] = useState('');
   const [priority, setPriority] = useState('');
+  const [subtasks, setSubtasks] = useState(['']); // To manage subtasks
   const [errorMessage, setErrorMessage] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
@@ -35,12 +39,14 @@ const TaskForm = ({ addTask, editingTask, handleEditTask }) => {
       setDueDate(editingTask.dueDate.split(' ')[0]);
       setDueTime(editingTask.dueDate.split(' ')[1]);
       setPriority(editingTask.priority);
+      setSubtasks(editingTask.subtasks); // Load existing subtasks
     } else {
       setTaskTitle('');
       setDescription('');
       setDueDate('');
       setDueTime('');
       setPriority('');
+      setSubtasks(['']); // Reset subtasks
     }
   }, [editingTask]);
 
@@ -58,6 +64,7 @@ const TaskForm = ({ addTask, editingTask, handleEditTask }) => {
       priority,
       completed: false,
       id: editingTask ? editingTask.id : Date.now(),
+      subtasks: subtasks.map((subtask) => ({ title: subtask, completed: false })), // Map subtasks to the desired structure
     };
 
     if (editingTask) {
@@ -71,6 +78,17 @@ const TaskForm = ({ addTask, editingTask, handleEditTask }) => {
     setDueDate('');
     setDueTime('');
     setPriority('');
+    setSubtasks(['']); // Reset subtasks
+  };
+
+  const handleSubtaskChange = (index, value) => {
+    const updatedSubtasks = [...subtasks];
+    updatedSubtasks[index] = value;
+    setSubtasks(updatedSubtasks);
+  };
+
+  const addSubtask = () => {
+    setSubtasks([...subtasks, '']); // Add a new empty subtask
   };
 
   return (
@@ -134,6 +152,24 @@ const TaskForm = ({ addTask, editingTask, handleEditTask }) => {
               <MenuItem value="low">Low</MenuItem>
             </Select>
           </FormControl>
+        </Grid>
+        <Grid item xs={12}>
+          <h3>Subtasks</h3>
+          <List>
+            {subtasks.map((subtask, index) => (
+              <ListItem key={index}>
+                <TextField
+                  label={`Subtask ${index + 1}`}
+                  value={subtask}
+                  onChange={(e) => handleSubtaskChange(index, e.target.value)}
+                  fullWidth
+                />
+              </ListItem>
+            ))}
+          </List>
+          <Button variant="outlined" onClick={addSubtask}>
+            Add Subtask
+          </Button>
         </Grid>
         <Grid item xs={12}>
           <Button
